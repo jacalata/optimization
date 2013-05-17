@@ -5,16 +5,20 @@ import csv
 import datetime
 
 SHOWRESULT = True
-SHOWLOGIC = True
+SHOWLOGIC = False
 DEBUGLOG = False
 debugfilename = "scheduledebug" + str(datetime.datetime.now().minute) + ".log"
 debugfile = open(debugfilename, 'w')
+
 users = []
 workshops = []
 
-def output(*args):
-	print(args)
-	debugfile.write(args.__str__())
+#usage: output(SHOWLOGIC, mystr)
+def output(farg, *args):
+	line = " ".join(map(str, args))
+	if (farg):
+		print(line)
+	debugfile.write(line)
 	debugfile.write("\n")
 
 #data object definitions
@@ -36,8 +40,7 @@ class workshop:
 
 def initWorkshops(workshopNames):
 	# can't use 0 based list because am using 0 for null workshop
-	if (DEBUGLOG):
-		output("wshops:", workshopNames)
+	output(DEBUGLOG, "wshops:", workshopNames)
 	nullworkshop  = workshop()
 	nullworkshop.name = "NULL"
 	nullworkshop.sessions = [0,0,0]
@@ -54,8 +57,7 @@ def initWorkshops(workshopNames):
 		workshops.append(current)
 		i = i + 1
 
-	if (DEBUGLOG):
-		output("wshops:", workshopNames)
+	output(DEBUGLOG, "wshops:", workshopNames)
 
 class user(object):
 
@@ -79,21 +81,18 @@ class user(object):
 		# and sam seeing (b,a,d)
 		for pref in self.prefs:
 			if 0 not in self.sessions:
-				if (SHOWLOGIC):
-					output (self.name, "is fully booked")
+				output (SHOWLOGIC, self.name, "is fully booked")
 				return self.calculateScheduleQuality()
 			if 0 in workshops[pref].sessions:		
 				algorithm(workshops[pref], self.sessions)
 			else:
-				if (SHOWLOGIC):
-					output ("workshop", pref, " has no free slots in any session")
+				output (SHOWLOGIC, "workshop", pref, " has no free slots in any session")
 		 
 	def clearSchedule(self):
 		self.sessions = [0] * nSessions	
 
 	def showSchedule(self):
-		if (SHOWRESULT):
-			output (self.name, workshops[self.sessions[0]].name, workshops[self.sessions[1]].name, workshops[self.sessions[2]].name)
+		output (SHOWRESULT, self.name, workshops[self.sessions[0]].name, workshops[self.sessions[1]].name, workshops[self.sessions[2]].name)
 
 	def calculateScheduleQuality(self):
 		score = 0; 
@@ -114,13 +113,11 @@ def readInData():
 	#remaining lines = sam, preferenceID1, preferenceID2,...preferenceIDN
 	n = 0
 	for row in reader:
-		if (DEBUGLOG):
-			output (row)
+		output (DEBUGLOG, row)
 		if (n == 0):
 			nWorkshops = row[0]
 			workshopNames = row[1:]
-			if (DEBUGLOG):
-				output("wshopsread:", workshopNames)
+			output(DEBUGLOG, "wshopsread:", workshopNames)
 			initWorkshops(workshopNames)
 		else:
 			name = row[0]
@@ -143,37 +140,31 @@ def clearSchedules():
 
 #algorithms to choose from
 def naiveFindSpace(workshop, userSessions):		
-	if (DEBUGLOG):
-		output ("Naive algorithm")
-		output ("user day so far::", userSessions)
-		output ("-current attendance at workshop", workshop.name, ":", workshop.sessions)
+	output (DEBUGLOG, "Naive algorithm")
+	output (DEBUGLOG, "user day so far::", userSessions)
+	output (DEBUGLOG, "-current attendance at workshop", workshop.name, ":", workshop.sessions)
 	for session in range(0,3):
 		#print(user.name, pref, session)
 		if workshop.sessions[session] < nSlots:
 			if user.sessions[session] == 0:
 				user.attend(session, workshop)
-				if (SHOWLOGIC):
-					output(user.name, "will attend workshop", workshop.name, "in session", session)
+				output(SHOWLOGIC, user.name, "will attend workshop", workshop.name, "in session", session)
 				return
 			else:
-				if (SHOWLOGIC):
-					output (user.name, "is already busy in session", session)
+				output (SHOWLOGIC, user.name, "is already busy in session", session)
 		else:
-			if (SHOWLOGIC):
-				output("workshop", workshop.name, "slot", session, "is already full")
+			output(SHOWLOGIC, "workshop", workshop.name, "slot", session, "is already full")
 
 def v2FindSpace(workshop, userSessions):
-	if (DEBUGLOG):
-		output ("Second algorithm")
-		output ("user day so far::", userSessions)
-		output ("-current attendance at workshop", workshop.name, ":", workshop.sessions)
+	output (DEBUGLOG, "Second algorithm")
+	output (DEBUGLOG, "user day so far::", userSessions)
+	output (DEBUGLOG, "-current attendance at workshop", workshop.name, ":", workshop.sessions)
 	for session in range(0,nSessions):
 		#print(user.name, pref, session)
 		if workshop.sessions[session] < nSlots:
 			if user.sessions[session] == 0:
 				user.attend(session, workshop)
-				if (SHOWLOGIC):
-					output(user.name, "will attend workshop", workshop.name, "in session", session)
+				output(SHOWLOGIC, user.name, "will attend workshop", workshop.name, "in session", session)
 				return
 	#there were no seats at our available times: pass through again and try rearranging our available times
 	for session in range(0,nSessions):
@@ -185,53 +176,44 @@ def v2FindSpace(workshop, userSessions):
 			if (betterWorkshop.hasSpaceAvailable() ):
 				#check if there is an open seat in this workshop during one of the users remaining free sessions
 				for freeSession in range(nSessions):
-					if (DEBUGLOG):
-						output(freeSession, user.sessions)
+					output(DEBUGLOG, freeSession, user.sessions)
 					if user.sessions[freeSession] == 0:
 						if betterWorkshop.sessions[freeSession] == 0:
 							user.cancel(session, betterWorkshop)
 							user.attend(freeSession, betterWorkshop)
 							user.attend(session, workshop)
-							if (SHOWLOGIC):
-								output(user.name, "has switched to attend workshop", workshop.name, "in session", session)
-								output(user.name, "has switched to attend workshop", betterWorkshop.name, "in session", freeSession)
+							output(SHOWLOGIC, user.name, "has switched to attend workshop", workshop.name, "in session", session)
+							output(SHOWLOGIC, user.name, "has switched to attend workshop", betterWorkshop.name, "in session", freeSession)
 							return
 		else:
-			if (SHOWLOGIC):
-				output("workshop", workshop.name, "slot", session, "is already full")
+			output(SHOWLOGIC, "workshop", workshop.name, "slot", session, "is already full")
 
 algorithms = [naiveFindSpace, v2FindSpace]
 
 #def __main__?
 nSessions = 3 # how many workshops you can attend in total
 workshopNames, nSlots = readInData() #workshop names, n Seats per workshop
-if (SHOWRESULT):
-	output(workshopNames, nSlots)
+output(SHOWRESULT, workshopNames, nSlots)
 scheduleQuality = [0] * len(algorithms) 
 
 for i in range(len(algorithms)):
-	if (SHOWRESULT):
-		output("-------")
+	output(SHOWRESULT, "-------")
 	scheduleQuality[i] = [] * len(users)
 	for user in users:
-		if (DEBUGLOG):
-			output(user.name, ":", user.prefs)
-			output(algorithms[i].__name__)
+		output(DEBUGLOG, user.name, ":", user.prefs)
+		output(DEBUGLOG, algorithms[i].__name__)
 		score = user.assignByPreferences(algorithms[i])
 		scheduleQuality[i].append(score)
-		if (DEBUGLOG):
-			output("score= ", score)
-			output(scheduleQuality[i])
+		output(DEBUGLOG, "score= ", score)
+		output(DEBUGLOG, scheduleQuality[i])
 		user.showSchedule()
 	#clear existing user schedule
 	clearSchedules()
 
 averages = [sum(x)/len(x) for x in scheduleQuality]
-if (SHOWRESULT):
-	str =  [x.__name__ for x in algorithms]
-	output(str)
-	output("schedule scores are:", scheduleQuality)
-	output("schedule averages are ", averages)
+output(SHOWRESULT, [x.__name__ for x in algorithms])
+output(SHOWRESULT, "schedule scores are:", scheduleQuality)
+output(SHOWRESULT, "schedule averages are ", averages)
 
 debugfile.close()
 # graph schedule quality or something
