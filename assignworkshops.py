@@ -2,19 +2,20 @@
 
 import math
 import csv
+import datetime
 
 SHOWRESULT = True
 SHOWLOGIC = True
 DEBUGLOG = False
-debugfilename = "scheduledebug.log"
+debugfilename = "scheduledebug" + str(datetime.datetime.now().minute) + ".log"
 debugfile = open(debugfilename, 'w')
 users = []
 workshops = []
 
 def output(*args):
-	for arg in args:
-		print(arg)
-		debugfile.write(args.__str__())
+	print(args)
+	debugfile.write(args.__str__())
+	debugfile.write("\n")
 
 #data object definitions
 class workshop:
@@ -85,14 +86,14 @@ class user(object):
 				algorithm(workshops[pref], self.sessions)
 			else:
 				if (SHOWLOGIC):
-					print ("workshop", pref, " has no free slots in any session")
+					output ("workshop", pref, " has no free slots in any session")
 		 
 	def clearSchedule(self):
 		self.sessions = [0] * nSessions	
 
 	def showSchedule(self):
 		if (SHOWRESULT):
-			print (self.name, workshops[self.sessions[0]].name, workshops[self.sessions[1]].name, workshops[self.sessions[2]].name)
+			output (self.name, workshops[self.sessions[0]].name, workshops[self.sessions[1]].name, workshops[self.sessions[2]].name)
 
 	def calculateScheduleQuality(self):
 		score = 0; 
@@ -152,14 +153,14 @@ def naiveFindSpace(workshop, userSessions):
 			if user.sessions[session] == 0:
 				user.attend(session, workshop)
 				if (SHOWLOGIC):
-					print(user.name, "will attend workshop", workshop.name, "in session", session)
+					output(user.name, "will attend workshop", workshop.name, "in session", session)
 				return
 			else:
 				if (SHOWLOGIC):
-					print (user.name, "is already busy in session", session)
+					output (user.name, "is already busy in session", session)
 		else:
 			if (SHOWLOGIC):
-				print("workshop", workshop.name, "slot", session, "is already full")
+				output("workshop", workshop.name, "slot", session, "is already full")
 
 def v2FindSpace(workshop, userSessions):
 	if (DEBUGLOG):
@@ -172,7 +173,7 @@ def v2FindSpace(workshop, userSessions):
 			if user.sessions[session] == 0:
 				user.attend(session, workshop)
 				if (SHOWLOGIC):
-					print(user.name, "will attend workshop", workshop.name, "in session", session)
+					output(user.name, "will attend workshop", workshop.name, "in session", session)
 				return
 	#there were no seats at our available times: pass through again and try rearranging our available times
 	for session in range(0,nSessions):
@@ -192,12 +193,12 @@ def v2FindSpace(workshop, userSessions):
 							user.attend(freeSession, betterWorkshop)
 							user.attend(session, workshop)
 							if (SHOWLOGIC):
-								print(user.name, "has switched to attend workshop", workshop.name, "in session", session)
-								print(user.name, "has switched to attend workshop", betterWorkshop.name, "in session", freeSession)
+								output(user.name, "has switched to attend workshop", workshop.name, "in session", session)
+								output(user.name, "has switched to attend workshop", betterWorkshop.name, "in session", freeSession)
 							return
 		else:
 			if (SHOWLOGIC):
-				print("workshop", workshop.name, "slot", session, "is already full")
+				output("workshop", workshop.name, "slot", session, "is already full")
 
 algorithms = [naiveFindSpace, v2FindSpace]
 
@@ -205,12 +206,12 @@ algorithms = [naiveFindSpace, v2FindSpace]
 nSessions = 3 # how many workshops you can attend in total
 workshopNames, nSlots = readInData() #workshop names, n Seats per workshop
 if (SHOWRESULT):
-	print(workshopNames, nSlots)
+	output(workshopNames, nSlots)
 scheduleQuality = [0] * len(algorithms) 
 
 for i in range(len(algorithms)):
 	if (SHOWRESULT):
-		print("-------")
+		output("-------")
 	scheduleQuality[i] = [] * len(users)
 	for user in users:
 		if (DEBUGLOG):
@@ -227,8 +228,10 @@ for i in range(len(algorithms)):
 
 averages = [sum(x)/len(x) for x in scheduleQuality]
 if (SHOWRESULT):
-	print( [x.__name__ for x in algorithms])
-	print("schedule scores are:", scheduleQuality)
-	print("schedule averages are ", averages)
+	str =  [x.__name__ for x in algorithms]
+	output(str)
+	output("schedule scores are:", scheduleQuality)
+	output("schedule averages are ", averages)
 
+debugfile.close()
 # graph schedule quality or something
