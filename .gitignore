@@ -133,4 +133,4 @@ pip-log.txt
 .DS_Store
 
 # my debug logs
-.log
+*.log
