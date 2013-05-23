@@ -15,6 +15,7 @@ urlpatterns = patterns('',
 
     # Django tutorials
     url(r'^time/plus/(\d{1,2})/$', hours_ahead),
+    url(r'^time/$', current),
 
     # Examples:
     # url(r'^$', 'SimplySchedule.views.home', name='home'),

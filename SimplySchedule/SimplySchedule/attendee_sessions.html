@@ -1,0 +1,10 @@
+<body>
+<ul>
+{% for attendee in attendee_list %}
+    <li>{{ attendee.name }} is attending sessions {{ attendee.session1 }}, \
+{{ attendee.session2}} and {{ attendee.session3}}</li>
+{% empty %}
+<p>Nobody is going to any workshops</p>
+{% endfor %}
+</ul>
+</body>

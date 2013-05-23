@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.shortcuts import render
 import datetime
 
 def hello(request):
@@ -6,12 +6,11 @@ def hello(request):
 
 def current(request):
     now = datetime.datetime.now()
-    html = "<html><body>It is now %s.</body></html>" % now
-    return HttpResponse(html)
+    return render(request, 'current_datetime.html', {'current_date': now})
 
 def homepage(request):
-    html = "<html><body>Welcome to the schedule planner!</body></html>"
-    return HttpResponse(html)
+    return render(request, 'welcome.html', {})
+
 
 def hours_ahead(request, offset):
     #try:

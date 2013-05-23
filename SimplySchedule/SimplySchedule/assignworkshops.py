@@ -108,7 +108,8 @@ class user(object):
 def readInData():
 
 	#region file reading
-	reader = csv.reader(open('SampleData1.csv', newline=''), delimiter=',', quotechar='|')
+	#3 reader = csv.reader(open('SampleData1.csv', newline=''), delimiter=',', quotechar='|')
+	reader = csv.reader(open('SampleData1.csv'), delimiter=',', quotechar='|')
 	#line 1 = nWorkshops, workshopname1, workshopname2,...,workshopnameN
 	#remaining lines = sam, preferenceID1, preferenceID2,...preferenceIDN
 	n = 0
