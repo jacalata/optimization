@@ -19,3 +19,12 @@ def hours_ahead(request, offset):
         raise Http404()
     dt = datetime.datetime.now() + datetime.timedelta(hours=offset)
     return render(request, 'future_datetime.html', {'offset':offset, 'future_time':dt})
+
+
+def book_list(request):
+    db = MySQLdb.connect(user='jacalata_sql1', db='mylittledatabase', passwd='92fbgPXB9jdwgMV', host='v0ym2lpg1o.database.windows.net:1433')
+    cursor = db.cursor()
+    cursor.execute('SELECT name FROM books ORDER BY name')
+    names = [row[0] for row in cursor.fetchall()]
+    db.close()
+    return render(request, 'book_list.html', {'names': names})
