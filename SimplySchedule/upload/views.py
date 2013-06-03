@@ -28,7 +28,7 @@ def upload(request):
 
 def sample_view(request):
     filename = 'SampleData2.csv'
-    dataLines, resultFilename, resultLines = run_scheduler(filename)
+    dataLines, resultFilename, resultLines = run_scheduler(filename, None, None, True)
     return render(request,'thanks.html', {'file': dataLines, 'result': resultLines})
 
 
