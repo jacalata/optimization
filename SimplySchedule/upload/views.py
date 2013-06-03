@@ -3,6 +3,8 @@ from upload.forms import upload_form
 from django.http import HttpResponseRedirect 
 from upload.assignworkshops import initialiseAndRunScheduler
 import csv
+import os.path
+BASE = os.path.dirname(os.path.abspath(__file__))
 
 def upload(request):
     if request.method == 'POST':
@@ -37,7 +39,7 @@ def upload_thanks(request):
 
 def run_scheduler(filename, in_nSessions, in_workshopNames, useMetadata):
     dataLines = []
-    uploadedData = open(filename, 'r').read()
+    uploadedData = open(os.path.join(BASE, '..', filename), 'r')  .read() #expect file to be in the directory above this .py file
     uploadReader = csv.reader(open(filename, 'r'), delimiter=',', quotechar='|')
     for line in uploadReader:
         dataLines.append(line)
