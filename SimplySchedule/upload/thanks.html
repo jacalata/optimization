@@ -2,9 +2,13 @@
 {% block title %}New Attendee List{% endblock %}
 
 {% block content %}
-Thanks for uploading your file!
+Thanks for uploading your request! <br>
 <br>
 {% include 'attendeePrefs.html' %}
 {% include 'scheduleView.html' %}
 <br> 
+<br>
+<i>
+Debug info: form values were {{ formdata }}
+</i>
 {% endblock %}

@@ -5,14 +5,16 @@ import csv
 import datetime
 
 SHOWRESULT = True
-SHOWLOGIC = False
-DEBUGLOG = False
+SHOWLOGIC = True
+DEBUGLOG = True
 debugfilename = "scheduledebug" + str(datetime.datetime.now().minute) + ".log"
 debugfile = None #opened in run_scheduler
 
 users = []
 workshops = []
 workshopNames = []
+nSessions = 0
+nSlots = 0
 
 #usage: output(SHOWLOGIC, mystr)
 def output(farg, *args):
@@ -66,7 +68,7 @@ class user(object):
 	def __init__(self, newname, newprefs):
 		self.name = newname
 		self.prefs = newprefs
-		output(SHOWRESULT, nSessions)
+		output(SHOWRESULT, "initing user", nSessions)
 		self.sessions = [0] * nSessions	
 
 	def attend(self, session, workshop):
@@ -85,6 +87,7 @@ class user(object):
 		output(self.name)
 		for pref in self.prefs:
 			if 0 not in self.sessions:
+				output(DEBUGLOG, self.sessions)
 				output (SHOWLOGIC, self.name, "is fully booked")
 				return self.calculateScheduleQuality()
 			if 0 in workshops[pref].sessions:	
@@ -96,7 +99,10 @@ class user(object):
 		self.sessions = [0] * nSessions	
 
 	def showSchedule(self):
-		values = [workshops[self.sessions[0]].name, workshops[self.sessions[1]].name, workshops[self.sessions[2]].name]
+		# does not handle more than three sessions!
+		values = []
+		for i in range(nSessions):
+			values.append(workshops[self.sessions[i]].name)
 		listing = self.name + ': ' + ','.join(values)
 		output (SHOWRESULT, listing)
 		return listing
@@ -112,52 +118,6 @@ class user(object):
 		return score
 
 
-def clearAllData():
-	global users
-	users = []
-	global workshops 
-	workshops = []
-	global workshopNames
-	workshopNames = []
-	output(True, "cleared")
-
-
-#data initialisation
-def readInData(filename):
-	global users
-	global workshops
-	global workshopNames
-	#region file reading
-	#3 reader = csv.reader(open('SampleData1.csv', newline=''), delimiter=',', quotechar='|')
-	reader = csv.reader(open(filename), delimiter=',', quotechar='|')
-	#line 1 = nWorkshops, workshopname1, workshopname2,...,workshopnameN
-	#remaining lines = sam, preferenceID1, preferenceID2,...preferenceIDN
-	n = 0
-	for row in reader:
-		output (DEBUGLOG, row)
-		if (n == 0):
-			nWorkshops = row[0]
-			workshopNames = row[1:]
-			output(DEBUGLOG, "wshopsread:", workshopNames)
-			initWorkshops()
-		else:
-			name = row[0]
-			#prefs = map( int, row[1:])
-			prefs = []
-			for i in row[1:]:
-				prefs.append(int(i))
-			users.append(user(name, prefs))
-		n = n+1
-
-	n = len(users)
-	return workshopNames, math.ceil(n/10.0)
-
-def clearSchedules():
-	for workshop in workshops:
-		workshop.clearSchedule()
-	for user in users:
-		user.clearSchedule();
-
 
 #algorithms to choose from
 def naiveFindSpace(workshop, user):		
@@ -165,7 +125,7 @@ def naiveFindSpace(workshop, user):
 	output (DEBUGLOG, "user day so far::", user.sessions)
 	output (DEBUGLOG, "-current attendance at workshop", workshop.name, ":", workshop.sessions)
 	for session in range(0,3):
-		#print(user.name, pref, session)
+		output(DEBUGLOG, "for session:", user.name, workshop.sessions, nSlots )
 		if workshop.sessions[session] < nSlots:	
 			if user.sessions[session] == 0:
 				user.attend(session, workshop)
@@ -211,20 +171,94 @@ def v2FindSpace(workshop, user):
 
 algorithms = [naiveFindSpace, v2FindSpace]
 outputFiles = ['naiveFindSpace.txt', 'v2FindSpace.txt']
-nSessions = 0
-nSlots = 0
 
 
-def runScheduler(filename):	
+
+#data initialisation
+def initialiseAndRunScheduler(filename, in_nSessions, in_workshopNames, useMetadata):
 	global debugfile
-	global nSessions
-	global nSlots
 	debugfile = open(debugfilename, 'w')
 
 	clearAllData()
+
+	if (not useMetadata):
+		global nSessions
+		global workshopNames
+		nSessions = in_nSessions
+		workshopNames = in_workshopNames
+		initWorkshops()
+
+	output(DEBUGLOG, "in values: ", filename, in_nSessions, in_workshopNames, useMetadata)
+	output(DEBUGLOG, "before read data:", nSessions, nSlots, workshopNames, workshops)
+
+	readInData(filename, useMetadata)
+	output(DEBUGLOG, "finished initting data:", nSessions, nSlots, workshopNames, workshops)
+	schedule = runScheduler()
+
+	debugfile.close()
+	return schedule
+
+
+def readInData(filename, useMetadata):
+	global users
+	global nSlots
 	nSessions = 3
-	workshopNames, nSlots = readInData(filename) #workshop names, n Workshop sessions,  n Seats per workshop
-	output(SHOWRESULT, workshopNames, nSlots)
+	#region file reading
+	#3 reader = csv.reader(open('SampleData1.csv', newline=''), delimiter=',', quotechar='|')
+	reader = csv.reader(open(filename), delimiter=',', quotechar='|')
+	#line 1 = nWorkshops, workshopname1, workshopname2,...,workshopnameN
+	#remaining lines = sam, preferenceID1, preferenceID2,...preferenceIDN
+	n = 0
+	for row in reader:
+		output (DEBUGLOG, row)
+		if (n == 0):
+			if (RepresentsInt(row[0])):
+				if (useMetadata):
+					global workshops
+					global workshopNames
+					global nSessions		
+					nWorkshops = row[0]
+					workshopNames = row[1:]
+					output(DEBUGLOG, "wshopsread:", workshopNames)
+					initWorkshops()
+				continue # the first row was setup data
+		name = row[0]
+		#prefs = map( int, row[1:])
+		prefs = []
+		for i in row[1:len(workshopNames)+1]:
+			prefs.append(int(i))
+		users.append(user(name, prefs))
+		n = n+1
+
+	n = len(users)
+	nSlots = math.ceil(n/10.0)
+	output(SHOWRESULT, "read data op complete", workshopNames, nSlots)
+
+def clearSchedules():
+	for workshop in workshops:
+		workshop.clearSchedule()
+	for user in users:
+		user.clearSchedule();
+
+def clearAllData():
+	global users
+	users = []
+	global workshops 
+	workshops = []
+	global workshopNames
+	workshopNames = []
+	output(True, "cleared")
+
+def RepresentsInt(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
+def runScheduler():
+	
 	scheduleQuality = [0] * len(algorithms) 
 
 	for i in range(len(algorithms)):
@@ -249,8 +283,6 @@ def runScheduler(filename):
 	output(SHOWRESULT, [x.__name__ for x in algorithms])
 	output(SHOWRESULT, "schedule scores are:", scheduleQuality)
 	#output(SHOWRESULT, "schedule averages are ", averages)
-
-	debugfile.close()
 
 	# choose the schedule with the highest average?
 	return outputFiles[1]

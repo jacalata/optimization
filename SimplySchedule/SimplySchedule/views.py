@@ -27,5 +27,5 @@ def hours_ahead(request, offset):
 def http_request_templated_view(request):
     values = request.META.items()
     values.sort()
-    return render(request, 'request_view.html', {'values': values})
+    return render(request, 'request_view.html', {'request': request})
 
