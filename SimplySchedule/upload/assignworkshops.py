@@ -178,7 +178,7 @@ outputFiles = ['naiveFindSpace.txt', 'v2FindSpace.txt']
 #data initialisation
 def initialiseAndRunScheduler(filename, in_nSessions, in_workshopNames, useMetadata):
 	global debugfile
-	debugfile = open(debugfilename, 'w')
+	debugfile = open(os.path.join(BASE, '..',debugfilename), 'w')
 
 	clearAllData()
 
@@ -262,7 +262,7 @@ def runScheduler():
 	scheduleQuality = [0] * len(algorithms) 
 
 	for i in range(len(algorithms)):
-		outputFile = open(outputFiles[i], 'w+')
+		outputFile = open(os.path.join(BASE, '..',outputFiles[i]), 'w+'))
 		output(SHOWRESULT, "-------")
 		scheduleQuality[i] = [] * len(users)
 		for user in users:
