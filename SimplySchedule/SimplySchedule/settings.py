@@ -1,6 +1,8 @@
 # Django settings for SimplySchedule project.
 import os.path # for templates dir
 
+PROJECT_PATH = os.path.realpath(os.path.dirname(__file__)) #http://stackoverflow.com/questions/3038459/django-template-path
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -110,11 +112,9 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "C:/Users/jafitzge/Dropbox/code/optimization/SimplySchedule/SimplySchedule", 
-    "C:/Users/jafitzge/Dropbox/code/optimization/SimplySchedule/books",
-    "C:/Users/jafitzge/Dropbox/code/optimization/SimplySchedule/upload",
-    # but what should it be for azure? 
-    os.path.dirname(__file__).replace('\\','/'),
+    PROJECT_PATH+"/../SimplySchedule".replace('\\','/'),
+    PROJECT_PATH+"/../books".replace('\\','/'),
+    PROJECT_PATH+"/../upload".replace('\\','/'),
 )
 
 INSTALLED_APPS = (
