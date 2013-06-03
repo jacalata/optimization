@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 import datetime
 
 def hello(request):
@@ -9,7 +10,9 @@ def current(request):
     return render(request, 'current_datetime.html', {'current_date': now})
 
 def homepage(request):
-    return render(request, 'welcome.html', {})
+    values = request.META.items()
+    values.sort()
+    return render(request, 'welcome.html', {'request': request, 'values': values})
 
 
 def hours_ahead(request, offset):
@@ -21,10 +24,8 @@ def hours_ahead(request, offset):
     return render(request, 'future_datetime.html', {'offset':offset, 'future_time':dt})
 
 
-def book_list(request):
-    db = MySQLdb.connect(user='jacalata_sql1', db='mylittledatabase', passwd='92fbgPXB9jdwgMV', host='v0ym2lpg1o.database.windows.net:1433')
-    cursor = db.cursor()
-    cursor.execute('SELECT name FROM books ORDER BY name')
-    names = [row[0] for row in cursor.fetchall()]
-    db.close()
-    return render(request, 'book_list.html', {'names': names})
+def http_request_templated_view(request):
+    values = request.META.items()
+    values.sort()
+    return render(request, 'request_view.html', {'values': values})
+

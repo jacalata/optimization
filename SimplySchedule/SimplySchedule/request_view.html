@@ -1,0 +1,35 @@
+<p>See all the http request values!</p>
+
+
+<h1>Basic Values</h1>
+<table>
+<tr><td> request.path </td><td> {{ request.path  }} </td></tr>
+<tr><td> request.get_host() </td><td> {{ request.get_host }} </td></tr>
+<tr><td> request.get_full_path() </td><td> {{ request.get_full_path }} </td></tr>
+<tr><td> request.is_secure() </td><td> {{ request.is_secure }} </td></tr>
+</table>
+
+<h1>GET values</h1>
+{{ request.GET.items }}
+<table>
+{% for key, value in request.GET.items %}}
+	<tr><td> {{ key }} </td><td> {{ value }} </td></tr>
+{% endfor %}
+</table>
+
+
+<h1>POST values</h1>
+{{ request.POST.items }}
+<table>
+{% for key, value in request.POST.items %}}
+	<tr><td> {{ key }} </td><td> {{ value }} </td></tr>
+{% endfor %}
+</table>
+
+
+<h1>META values</h1>
+<table> 
+{% for key,value in values %}
+	<tr><td> {{ key }} </td><td> {{ value }} </td></tr>
+{% endfor %}
+</table>

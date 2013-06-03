@@ -1,0 +1,10 @@
+<h2>Schedule</h2>
+<table>
+{% for row in result %}
+<tr>
+	{% for item in row %} 
+	<td> {{ item }} </td>
+	{% endfor %}
+</tr>
+{% endfor %}
+</table>

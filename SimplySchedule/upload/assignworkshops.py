@@ -8,10 +8,11 @@ SHOWRESULT = True
 SHOWLOGIC = False
 DEBUGLOG = False
 debugfilename = "scheduledebug" + str(datetime.datetime.now().minute) + ".log"
-debugfile = open(debugfilename, 'w')
+debugfile = None #opened in run_scheduler
 
 users = []
 workshops = []
+workshopNames = []
 
 #usage: output(SHOWLOGIC, mystr)
 def output(farg, *args):
@@ -38,7 +39,8 @@ class workshop:
 	def clearSchedule(self):
 		self.sessions = [0] * nSessions
 
-def initWorkshops(workshopNames):
+def initWorkshops():
+	global workshopNames
 	# can't use 0 based list because am using 0 for null workshop
 	output(DEBUGLOG, "wshops:", workshopNames)
 	nullworkshop  = workshop()
@@ -64,6 +66,7 @@ class user(object):
 	def __init__(self, newname, newprefs):
 		self.name = newname
 		self.prefs = newprefs
+		output(SHOWRESULT, nSessions)
 		self.sessions = [0] * nSessions	
 
 	def attend(self, session, workshop):
@@ -79,12 +82,13 @@ class user(object):
 		# if Tom and Sam are the two attendees, and both want to see (a,b,c,d)
 		# this will result in tom seeing (a,b,c)
 		# and sam seeing (b,a,d)
+		output(self.name)
 		for pref in self.prefs:
 			if 0 not in self.sessions:
 				output (SHOWLOGIC, self.name, "is fully booked")
 				return self.calculateScheduleQuality()
-			if 0 in workshops[pref].sessions:		
-				algorithm(workshops[pref], self.sessions)
+			if 0 in workshops[pref].sessions:	
+				algorithm(workshops[pref], self)
 			else:
 				output (SHOWLOGIC, "workshop", pref, " has no free slots in any session")
 		 
@@ -92,7 +96,10 @@ class user(object):
 		self.sessions = [0] * nSessions	
 
 	def showSchedule(self):
-		output (SHOWRESULT, self.name, workshops[self.sessions[0]].name, workshops[self.sessions[1]].name, workshops[self.sessions[2]].name)
+		values = [workshops[self.sessions[0]].name, workshops[self.sessions[1]].name, workshops[self.sessions[2]].name]
+		listing = self.name + ': ' + ','.join(values)
+		output (SHOWRESULT, listing)
+		return listing
 
 	def calculateScheduleQuality(self):
 		score = 0; 
@@ -104,12 +111,25 @@ class user(object):
 			#ie if the highest preference they got was 5, then the score for that is 4
 		return score
 
-#data initialisation
-def readInData():
 
+def clearAllData():
+	global users
+	users = []
+	global workshops 
+	workshops = []
+	global workshopNames
+	workshopNames = []
+	output(True, "cleared")
+
+
+#data initialisation
+def readInData(filename):
+	global users
+	global workshops
+	global workshopNames
 	#region file reading
 	#3 reader = csv.reader(open('SampleData1.csv', newline=''), delimiter=',', quotechar='|')
-	reader = csv.reader(open('SampleData1.csv'), delimiter=',', quotechar='|')
+	reader = csv.reader(open(filename), delimiter=',', quotechar='|')
 	#line 1 = nWorkshops, workshopname1, workshopname2,...,workshopnameN
 	#remaining lines = sam, preferenceID1, preferenceID2,...preferenceIDN
 	n = 0
@@ -119,7 +139,7 @@ def readInData():
 			nWorkshops = row[0]
 			workshopNames = row[1:]
 			output(DEBUGLOG, "wshopsread:", workshopNames)
-			initWorkshops(workshopNames)
+			initWorkshops()
 		else:
 			name = row[0]
 			#prefs = map( int, row[1:])
@@ -140,13 +160,13 @@ def clearSchedules():
 
 
 #algorithms to choose from
-def naiveFindSpace(workshop, userSessions):		
+def naiveFindSpace(workshop, user):		
 	output (DEBUGLOG, "Naive algorithm")
-	output (DEBUGLOG, "user day so far::", userSessions)
+	output (DEBUGLOG, "user day so far::", user.sessions)
 	output (DEBUGLOG, "-current attendance at workshop", workshop.name, ":", workshop.sessions)
 	for session in range(0,3):
 		#print(user.name, pref, session)
-		if workshop.sessions[session] < nSlots:
+		if workshop.sessions[session] < nSlots:	
 			if user.sessions[session] == 0:
 				user.attend(session, workshop)
 				output(SHOWLOGIC, user.name, "will attend workshop", workshop.name, "in session", session)
@@ -156,9 +176,9 @@ def naiveFindSpace(workshop, userSessions):
 		else:
 			output(SHOWLOGIC, "workshop", workshop.name, "slot", session, "is already full")
 
-def v2FindSpace(workshop, userSessions):
+def v2FindSpace(workshop, user):
 	output (DEBUGLOG, "Second algorithm")
-	output (DEBUGLOG, "user day so far::", userSessions)
+	output (DEBUGLOG, "user day so far::", user.sessions)
 	output (DEBUGLOG, "-current attendance at workshop", workshop.name, ":", workshop.sessions)
 	for session in range(0,nSessions):
 		#print(user.name, pref, session)
@@ -190,31 +210,48 @@ def v2FindSpace(workshop, userSessions):
 			output(SHOWLOGIC, "workshop", workshop.name, "slot", session, "is already full")
 
 algorithms = [naiveFindSpace, v2FindSpace]
+outputFiles = ['naiveFindSpace.txt', 'v2FindSpace.txt']
+nSessions = 0
+nSlots = 0
 
-#def __main__?
-nSessions = 3 # how many workshops you can attend in total
-workshopNames, nSlots = readInData() #workshop names, n Seats per workshop
-output(SHOWRESULT, workshopNames, nSlots)
-scheduleQuality = [0] * len(algorithms) 
 
-for i in range(len(algorithms)):
-	output(SHOWRESULT, "-------")
-	scheduleQuality[i] = [] * len(users)
-	for user in users:
-		output(DEBUGLOG, user.name, ":", user.prefs)
-		output(DEBUGLOG, algorithms[i].__name__)
-		score = user.assignByPreferences(algorithms[i])
-		scheduleQuality[i].append(score)
-		output(DEBUGLOG, "score= ", score)
-		output(DEBUGLOG, scheduleQuality[i])
-		user.showSchedule()
-	#clear existing user schedule
-	clearSchedules()
+def runScheduler(filename):	
+	global debugfile
+	global nSessions
+	global nSlots
+	debugfile = open(debugfilename, 'w')
 
-averages = [sum(x)/len(x) for x in scheduleQuality]
-output(SHOWRESULT, [x.__name__ for x in algorithms])
-output(SHOWRESULT, "schedule scores are:", scheduleQuality)
-output(SHOWRESULT, "schedule averages are ", averages)
+	clearAllData()
+	nSessions = 3
+	workshopNames, nSlots = readInData(filename) #workshop names, n Workshop sessions,  n Seats per workshop
+	output(SHOWRESULT, workshopNames, nSlots)
+	scheduleQuality = [0] * len(algorithms) 
 
-debugfile.close()
-# graph schedule quality or something
+	for i in range(len(algorithms)):
+		outputFile = open(outputFiles[i], 'w+')
+		output(SHOWRESULT, "-------")
+		scheduleQuality[i] = [] * len(users)
+		for user in users:
+			output(DEBUGLOG, user.name, ":", user.prefs)
+			output(DEBUGLOG, algorithms[i].__name__)
+			score = user.assignByPreferences(algorithms[i])
+			scheduleQuality[i].append(score)
+			output(DEBUGLOG, "score= ", score)
+			output(DEBUGLOG, scheduleQuality[i])
+			user.showSchedule()
+			outputFile.write(user.showSchedule())
+			outputFile.write('\n')
+		#clear existing user schedule
+		outputFile.close()
+		clearSchedules()
+
+	#averages = [sum(x)/len(x) for x in scheduleQuality]
+	output(SHOWRESULT, [x.__name__ for x in algorithms])
+	output(SHOWRESULT, "schedule scores are:", scheduleQuality)
+	#output(SHOWRESULT, "schedule averages are ", averages)
+
+	debugfile.close()
+
+	# choose the schedule with the highest average?
+	return outputFiles[1]
+	# graph schedule quality or something

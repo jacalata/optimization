@@ -41,4 +41,9 @@ attendee_t = Template(attendee_template)
 attendee_context = Context({'attendee': Tom})
 attendee_t.render(attendee_context)
 
+request_view_template = """<table> 
+{% for key,value in vars %}
+	<tr><td> {{ key }} </td><td> {{ value }} </td></tr>
+{% endfor %}
+</table>"""
 
