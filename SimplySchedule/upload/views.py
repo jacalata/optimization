@@ -39,12 +39,13 @@ def upload_thanks(request):
 
 def run_scheduler(filename, in_nSessions, in_workshopNames, useMetadata):
     dataLines = []
-    uploadedData = open(os.path.join(BASE, '..', filename), 'r')  .read() #expect file to be in the directory above this .py file
-    uploadReader = csv.reader(open(filename, 'r'), delimiter=',', quotechar='|')
+    uploadedData = open(os.path.join(BASE, '..', filename), 'r').read() #expect file to be in the directory above this .py file
+    uploadReader = csv.reader(open(os.path.join(BASE, '..', filename), 'r'), delimiter=',', quotechar='|')
     for line in uploadReader:
         dataLines.append(line)
 
     resultFilename = initialiseAndRunScheduler(filename, in_nSessions, in_workshopNames, useMetadata)
+    #don't think this needs normalising to module dir b/c was created at runtime
     result = open(resultFilename, 'r').read()
     resultLines = []
     resultReader = csv.reader(open(resultFilename, 'r'), delimiter=' ', quotechar='|')
@@ -57,7 +58,7 @@ def handle_uploaded_file(f):
     if (f == None):
         return 'SampleData2.csv'
     tempLocation = 'uploadedFile.csv'
-    destination = open(tempLocation, 'wb+')
+    destination = open(os.path.join(BASE, '..', tempLocation), 'wb+')
     for chunk in f.chunks():
         destination.write(chunk)
     return tempLocation

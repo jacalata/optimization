@@ -1,8 +1,9 @@
-
-
 import math
 import csv
 import datetime
+
+import os.path
+BASE = os.path.dirname(os.path.abspath(__file__))
 
 SHOWRESULT = True
 SHOWLOGIC = True
@@ -204,8 +205,7 @@ def readInData(filename, useMetadata):
 	global nSlots
 	nSessions = 3
 	#region file reading
-	#3 reader = csv.reader(open('SampleData1.csv', newline=''), delimiter=',', quotechar='|')
-	reader = csv.reader(open(filename), delimiter=',', quotechar='|')
+	reader = csv.reader(open(os.path.join(BASE, '..', filename)), delimiter=',', quotechar='|')
 	#line 1 = nWorkshops, workshopname1, workshopname2,...,workshopnameN
 	#remaining lines = sam, preferenceID1, preferenceID2,...preferenceIDN
 	n = 0
