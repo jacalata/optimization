@@ -178,7 +178,8 @@ outputFiles = ['naiveFindSpace.txt', 'v2FindSpace.txt']
 #data initialisation
 def initialiseAndRunScheduler(filename, in_nSessions, in_workshopNames, useMetadata):
 	global debugfile
-	debugfile = open(os.path.join(BASE, '..',debugfilename), 'w')
+	debugfilepath = os.path.join(BASE, '..',debugfilename)
+	debugfile = open(debugfilepath, 'w')
 
 	clearAllData()
 
