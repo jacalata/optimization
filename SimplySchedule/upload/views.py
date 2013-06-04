@@ -46,10 +46,9 @@ def run_scheduler(filename, in_nSessions, in_workshopNames, useMetadata):
         dataLines.append(line)
 
     resultFilename = initialiseAndRunScheduler(filename, in_nSessions, in_workshopNames, useMetadata)
-    #don't think this needs normalising to module dir b/c was created at runtime
-    result = open(resultFilename, 'r').read()
+    result = open(os.path.join(BASE, '..',resultFilename), 'r').read()
     resultLines = []
-    resultReader = csv.reader(open(resultFilename, 'r'), delimiter=' ', quotechar='|')
+    resultReader = csv.reader(open(os.path.join(BASE, '..',resultFilename), 'r'), delimiter=' ', quotechar='|')
     for line in resultReader:
         resultLines.append(line)
 
