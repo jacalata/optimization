@@ -22,7 +22,7 @@ def upload(request):
                 workshopNames = None
                 useMetadata = True
             dataLines, resultFilename, resultLines = run_scheduler(filename, nSessions, workshopNames, useMetadata)
-            return render(request,'thanks.html', {'formdata': cd, 'file': dataLines, 'result': resultLines, 'request': request})
+            return render(request,'thanks.html', {'formdata': cd, 'file': dataLines, 'result': resultLines, 'request': request, 'schedulefile':resultFilename})
     else:
         form = upload_form(
             initial={'subject': 'I love your site!'}
