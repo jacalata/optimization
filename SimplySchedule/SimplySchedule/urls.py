@@ -7,9 +7,9 @@ admin.autodiscover()
 
 
 urlpatterns = patterns('upload.views',
-    url(r'^upload/$', 'upload'),
-    url(r'^upload/thanks/$', 'upload_thanks'),
+    url(r'^upload/$', 'upload_view'),
     url(r'^sample/$', 'sample_view'),
+    url(r'^files/(?P<requested_file>)*', 'file_server_view'),
 )
 
 
