@@ -2,6 +2,10 @@ import math
 import csv
 import datetime
 
+from django.core.files.storage import default_storage 
+from django.conf import settings
+from django.core.files.base import ContentFile
+
 import os.path
 BASE = os.path.dirname(os.path.abspath(__file__))
 
@@ -102,9 +106,10 @@ class user(object):
 	def showSchedule(self):
 		# does not handle more than three sessions!
 		values = []
+		values.append(self.name)
 		for i in range(nSessions):
 			values.append(workshops[self.sessions[i]].name)
-		listing = self.name + ': ' + ','.join(values)
+		listing = ','.join(values)
 		output (SHOWRESULT, listing)
 		return listing
 
@@ -171,15 +176,17 @@ def v2FindSpace(workshop, user):
 			output(SHOWLOGIC, "workshop", workshop.name, "slot", session, "is already full")
 
 algorithms = [naiveFindSpace, v2FindSpace]
-outputFiles = ['naiveFindSpace.txt', 'v2FindSpace.txt']
+outputFiles = []
 
 
 
 #data initialisation
 def initialiseAndRunScheduler(filename, in_nSessions, in_workshopNames, useMetadata):
 	global debugfile
-	debugfilepath = os.path.join(BASE, '..', debugfilename)
-	debugfile = open(debugfilepath, 'w')
+	global outputFiles
+
+	debugfile = open(getDebugFilePath(debugfilename), 'w')
+	outputFiles = [x.__name__ + ".csv" for x in algorithms]
 
 	clearAllData()
 
@@ -201,12 +208,20 @@ def initialiseAndRunScheduler(filename, in_nSessions, in_workshopNames, useMetad
 	return schedule
 
 
+
+def getPublicFilePath(filename):
+    return settings.MEDIA_ROOT + "/" + filename
+
+def getDebugFilePath(filename):
+    return settings.STATIC_ROOT + "/" + filename
+
+
 def readInData(filename, useMetadata):
 	global users
 	global nSlots
 	nSessions = 3
 	#region file reading
-	reader = csv.reader(open(os.path.join(BASE, '..', filename)), delimiter=',', quotechar='|')
+	reader = csv.reader(open(getPublicFilePath(filename)), delimiter=',', quotechar='|')
 	#line 1 = nWorkshops, workshopname1, workshopname2,...,workshopnameN
 	#remaining lines = sam, preferenceID1, preferenceID2,...preferenceIDN
 	n = 0
@@ -259,12 +274,13 @@ def RepresentsInt(s):
 
 
 def runScheduler():
+	global outputFiles
 	
 	scheduleQuality = [0] * len(algorithms) 
 
 	for i in range(len(algorithms)):
-		outfilepath = os.path.join(BASE, '..', outputFiles[i])
-		outputFile = open(outfilepath, 'w+')
+
+		outputFile = open(getPublicFilePath(outputFiles[i]), 'w+')
 		output(SHOWRESULT, "-------")
 		scheduleQuality[i] = [] * len(users)
 		for user in users:
