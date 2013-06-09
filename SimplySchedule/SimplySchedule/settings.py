@@ -3,11 +3,11 @@ import os.path # for templates dir
 
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__)) #http://stackoverflow.com/questions/3038459/django-template-path
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    # ('Jac Fitzgerald', 'jacalata@gmail.com'),
+     ('Jac Fitzgerald', 'jacalata@gmail.com'),
 )
 
 MANAGERS = ADMINS
