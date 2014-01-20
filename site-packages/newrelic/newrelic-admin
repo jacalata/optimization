@@ -1,0 +1,5 @@
+#!C:\Dropbox\code\optimization\SimplySchedule\env\Scripts\python.exe
+
+import newrelic.admin
+
+newrelic.admin.main()
