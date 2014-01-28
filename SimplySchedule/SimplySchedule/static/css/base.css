@@ -1,0 +1,74 @@
+/* CSS */
+
+.header {
+	background-color: #ccdff0;
+	height: 115px;
+}
+
+.content {
+	padding: 100px;
+}
+
+#home-logo {
+	float:left;
+	width: 100px;
+	margin:10px;
+}
+
+#page-title {
+	text-align: left;
+	vertical-align: middle;
+	background-color: red;
+	color: blue;
+}
+
+ul.errorlist {
+    margin: 0;
+    padding: 0;
+}
+
+.errorlist li {
+    background-color: red;
+    color: white;
+    display: block;
+    font-size: 10px;
+    margin: 0 0 3px;
+    padding: 4px 5px;
+}
+
+.error-text {
+	color:red;
+}
+
+tr, td {
+	border:1px solid black;
+	min-width: 60px;
+	min-height: 15px;
+	border-radius: 2px;
+	font-family: sans-serif;
+	padding-left: 3px;
+}
+
+
+/* Sticky Footer by Ryan Fait http://ryanfait.com/ */
+* {
+	margin: 0;
+}
+html, body {
+	height: 100%;
+}
+.wrapper {
+	background-color: #F9F9EF;
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	margin: 0 auto -25px ; 
+	/* the bottom margin is the negative value of the footer's height */
+}
+.footer, .push {
+	height: 25px; /* .push must be the same height as .footer */
+	text-align: right;
+	padding-right: 10px;
+}
+
+

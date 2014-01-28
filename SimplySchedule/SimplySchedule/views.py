@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.template import RequestContext
 import datetime
 
 def hello(request):
@@ -9,10 +10,6 @@ def current(request):
     now = datetime.datetime.now()
     return render(request, 'current_datetime.html', {'current_date': now})
 
-def homepage(request):
-    values = request.META.items()
-    values.sort()
-    return render(request, 'welcome.html', {'request': request, 'values': values})
 
 
 def hours_ahead(request, offset):

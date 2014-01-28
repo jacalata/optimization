@@ -2,25 +2,12 @@
 {% block title %}New Attendee List{% endblock %}
 
 {% block content %}
-<style type="text/css">
-    ul.errorlist {
-        margin: 0;
-        padding: 0;
-    }
-    .errorlist li {
-        background-color: red;
-        color: white;
-        display: block;
-        font-size: 10px;
-        margin: 0 0 3px;
-        padding: 4px 5px;
-    }
-</style>
 
-    <h1>Upload attendees and preferences</h1>
+
+    <h2>Upload attendees and preferences</h2>
 
     {% if form.errors %}
-        <p style="color: red;">
+        <p class="error-text">
             Please correct the error{{ form.errors|pluralize }} below.
         </p>
     {% endif %}

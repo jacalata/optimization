@@ -8,6 +8,12 @@ import csv
 import os.path
 BASE = os.path.dirname(os.path.abspath(__file__))
 
+
+def homepage(request):
+    values = request.META.items()
+    values.sort()
+    return render(request, 'welcome.html', {'request': request, 'values': values})
+
 def getFileUrlPath(filename):
     return settings.MEDIA_URL + filename
 
@@ -40,9 +46,10 @@ def upload_view(request):
 
 def sample_view(request):
     filename = 'SampleData2.csv'
+    static_url = settings.MEDIA_URL;
     dataLines, resultFilename, resultLines = run_scheduler(filename, None, None, True)
     resultFullPath = getFileUrlPath(resultFilename)
-    return render(request,'thanks.html', {'file': dataLines, 'result': resultLines, 'request': request, 'schedulefile':resultFullPath, 'name':"Sample Conference"})
+    return render(request,'thanks.html', {'file': dataLines, 'result': resultLines, 'request': request, 'schedulefile':resultFullPath, 'name':"Sample Conference", 'static':static_url})
 
 def file_to_response(filename):
     response = HttpResponse(mimetype="application/ms-excel")
